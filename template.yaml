@@ -13,35 +13,35 @@ Globals:
         Environment:
             Variables:
                 WalletHmacKey: !Ref WalletHmacKey
-                TransferRequeryEndpoint: !Ref TransferRequeryEndpoint
-                TransferRequeryQueueArn: !Ref TransferRequeryQueueArn
+                RequeryEndpoint: !Ref RequeryEndpoint
+                RequeryQueueArn: !Ref RequeryQueueArn
 
 Parameters:
     WalletHmacKey:
         Type: AWS::SSM::Parameter::Value<String>
         Default: /wallet/hmacKey
-    TransferRequeryEndpoint:
+    RequeryEndpoint:
         Type: AWS::SSM::Parameter::Value<String>
         Default: /payment/RequeryQueueUrl
-    TransferRequeryQueueArn:
+    RequeryQueueArn:
         Type: AWS::SSM::Parameter::Value<String>
         Default: /payment/RequeryQueueArn
 
 Resources:
-    TransferRequeryFunction:
+    RequeryFunction:
         Type: AWS::Serverless::Function
         Properties:
             CodeUri: src/
             Handler: functions/transferRequery.handler
             Runtime: nodejs18.x
-            Role: !GetAtt TransferRequeryFunctionRole.Arn
+            Role: !GetAtt RequeryFunctionRole.Arn
             Architectures:
                 - x86_64
             Events:
                 SQSEvent:
                     Type: SQS
                     Properties:
-                        Queue: !Ref TransferRequeryQueueArn
+                        !Ref RequeryQueueArn
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -51,7 +51,7 @@ Resources:
                 EntryPoints:
                     - functions/transferRequery.ts
 
-    TransferRequeryFunctionRole:
+    RequeryFunctionRole:
         Type: AWS::IAM::Role
         Properties:
             AssumeRolePolicyDocument:
@@ -78,9 +78,9 @@ Resources:
                             Resource: "*"
 
 Outputs:
-    TransferRequeryFunction:
-        Description: TransferRequery Service
-        Value: !GetAtt TransferRequeryFunction.Arn
+    RequeryFunction:
+        Description: Requery Service
+        Value: !GetAtt RequeryFunction.Arn
     HelloWorldFunctionIamRole:
         Description: Implicit IAM Role created for Transfer Requery function
-        Value: !GetAtt TransferRequeryFunctionRole.Arn
+        Value: !GetAtt RequeryFunctionRole.Arn
