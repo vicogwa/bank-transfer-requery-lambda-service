@@ -13,35 +13,41 @@ Globals:
         Environment:
             Variables:
                 WalletHmacKey: !Ref WalletHmacKey
-                RequeryEndpoint: !Ref RequeryEndpoint
-                RequeryQueueArn: !Ref RequeryQueueArn
+                TransferRequeryEndpoint: !Ref TransferRequeryEndpoint
+                TransferRequeryQueueArn: !Ref TransferRequeryQueueArn
+                TransferRequeryQueueUrl: !Ref TransferRequeryQueueUrl
 
 Parameters:
     WalletHmacKey:
         Type: AWS::SSM::Parameter::Value<String>
         Default: /wallet/hmacKey
-    RequeryEndpoint:
+    TransferRequeryEndpoint:
         Type: AWS::SSM::Parameter::Value<String>
-        Default: /payment/RequeryQueueUrl
-    RequeryQueueArn:
+        Default: /wallet/TransferRequeryEndpoint
+    TransferRequeryQueueArn:
         Type: AWS::SSM::Parameter::Value<String>
-        Default: /payment/RequeryQueueArn
+        Default: /wallet/TransferRequeryQueueArn
+    TransferRequeryQueueUrl:
+        Type: AWS::SSM::Parameter::Value<String>
+        Default: /wallet/TransferRequeryQueueUrl
+
+
 
 Resources:
-    RequeryFunction:
+    TransferRequeryFunction:
         Type: AWS::Serverless::Function
         Properties:
             CodeUri: src/
             Handler: functions/transferRequery.handler
             Runtime: nodejs18.x
-            Role: !GetAtt RequeryFunctionRole.Arn
+            Role: !GetAtt TransferRequeryFunctionRole.Arn
             Architectures:
                 - x86_64
             Events:
                 SQSEvent:
                     Type: SQS
                     Properties:
-                        !Ref RequeryQueueArn
+                        !Ref TransferRequeryQueueArn
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -51,7 +57,7 @@ Resources:
                 EntryPoints:
                     - functions/transferRequery.ts
 
-    RequeryFunctionRole:
+    TransferRequeryFunctionRole:
         Type: AWS::IAM::Role
         Properties:
             AssumeRolePolicyDocument:
@@ -78,9 +84,9 @@ Resources:
                             Resource: "*"
 
 Outputs:
-    RequeryFunction:
-        Description: Requery Service
-        Value: !GetAtt RequeryFunction.Arn
+    TransferRequeryFunction:
+        Description: TransferRequery Service
+        Value: !GetAtt TransferRequeryFunction.Arn
     HelloWorldFunctionIamRole:
-        Description: Implicit IAM Role created for Transfer Requery function
-        Value: !GetAtt RequeryFunctionRole.Arn
+        Description: Implicit IAM Role created for Transfer TransferRequery function
+        Value: !GetAtt TransferRequeryFunctionRole.Arn

@@ -1,14 +1,25 @@
 import { SQSHandler, SQSEvent } from 'aws-lambda';
+import AWS from 'aws-sdk';
 import { RequeryService } from '../services';
 
+const sqs = new AWS.SQS();
+
 export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
+    let messageBody: any;
     try {
-        const airtimeTransactionService = new RequeryService();
-        for (const message of event.Records) {
-            await airtimeTransactionService.processMessageAsync((message as any).body);
+        for (const record of event.Records) {
+            messageBody = record.body;
+            const airtimeTransactionService = new RequeryService();
+            await airtimeTransactionService.processMessageAsync(messageBody);
         }
     } catch (error) {
-        console.error('Handler error:', error);
-        throw error;
+        if (messageBody) {
+            const sqsparams: AWS.SQS.SendMessageRequest = {
+                QueueUrl: process.env.TransferRequeryQueueUrl as string,
+                MessageBody: messageBody,
+            };
+            await sqs.sendMessage(sqsparams).promise();
+        }
+        //throw error;
     }
 };

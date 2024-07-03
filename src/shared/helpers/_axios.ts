@@ -3,7 +3,7 @@ import { createHmac } from 'crypto';
 import { IRequestBody } from '../interfaces';
 
 export const postRequest = async (transaction_ref: string) => {
-    const reversalUrl = process.env.ReversalEndpoint || '';
+    const transactionRequeryUrl = process.env.TransferRequeryEndpoint || '';
     const request_body: IRequestBody = { transaction_ref: transaction_ref };
     const signature = await getSignature(request_body);
 
@@ -13,7 +13,7 @@ export const postRequest = async (transaction_ref: string) => {
         Accept: 'application/json',
     };
 
-    const response = await axios.put(reversalUrl, request_body, { headers });
+    const response = await axios.put(transactionRequeryUrl, request_body, { headers });
     return response.data;
 };
 

@@ -16,7 +16,7 @@
     "@aws-sdk/client-sqs": "^3.525.0",
     "@types/axios": "^0.14.0",
     "@types/uuid": "^9.0.8",
-    "aws-sdk": "^2.1569.0",
+    "aws-sdk": "^2.1653.0",
     "axios": "^1.7.2",
     "esbuild": "^0.14.14"
   },
