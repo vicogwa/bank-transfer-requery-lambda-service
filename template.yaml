@@ -87,6 +87,6 @@ Outputs:
     TransferRequeryFunction:
         Description: TransferRequery Service
         Value: !GetAtt TransferRequeryFunction.Arn
-    HelloWorldFunctionIamRole:
+    TransferRequeryFunctionRole:
         Description: Implicit IAM Role created for Transfer TransferRequery function
         Value: !GetAtt TransferRequeryFunctionRole.Arn
