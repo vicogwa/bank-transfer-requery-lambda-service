@@ -9,14 +9,10 @@ export class RequeryService {
                 typeof SqsMessageBody['Message'] == 'string'
                     ? JSON.parse(SqsMessageBody.Message)
                     : SqsMessageBody.Message;
-            const subject: string = SqsMessageBody['Subject'];
-
-            switch (subject) {
-                case 'VEND_FAILED':
-                    const transaction_ref: string =
-                        messageBody.transaction_id || messageBody.ClientResponse.TransactionReference;
-                    await postRequest(transaction_ref);
-            }
+            // const subject: string = SqsMessageBody['Subject'];
+            const transaction_ref: string =
+                messageBody.transaction_id || messageBody.ClientResponse.TransactionReference;
+            await postRequest(transaction_ref);
         } catch (error: any) {
             console.error('ERROR OCCURED', error.message);
             throw error;
