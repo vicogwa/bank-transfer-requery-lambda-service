@@ -1,65 +1,77 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { lambdaHandler } from '../../app';
-import { expect, describe, it } from '@jest/globals';
+import { SQSEvent, Context } from 'aws-lambda';
+import { handler } from '../../functions/transferRequery';
+import { RequeryService } from '../../services';
+import { mockClient } from 'aws-sdk-client-mock';
+import { SQSClient } from '@aws-sdk/client-sqs';
+import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
+import { jest } from '@jest/globals';
 
-describe('Unit test for app handler', function () {
-    it('verifies successful response', async () => {
-        const event: APIGatewayProxyEvent = {
-            httpMethod: 'get',
-            body: '',
-            headers: {},
-            isBase64Encoded: false,
-            multiValueHeaders: {},
-            multiValueQueryStringParameters: {},
-            path: '/hello',
-            pathParameters: {},
-            queryStringParameters: {},
-            requestContext: {
-                accountId: '123456789012',
-                apiId: '1234',
-                authorizer: {},
-                httpMethod: 'get',
-                identity: {
-                    accessKey: '',
-                    accountId: '',
-                    apiKey: '',
-                    apiKeyId: '',
-                    caller: '',
-                    clientCert: {
-                        clientCertPem: '',
-                        issuerDN: '',
-                        serialNumber: '',
-                        subjectDN: '',
-                        validity: { notAfter: '', notBefore: '' },
-                    },
-                    cognitoAuthenticationProvider: '',
-                    cognitoAuthenticationType: '',
-                    cognitoIdentityId: '',
-                    cognitoIdentityPoolId: '',
-                    principalOrgId: '',
-                    sourceIp: '',
-                    user: '',
-                    userAgent: '',
-                    userArn: '',
-                },
-                path: '/hello',
-                protocol: 'HTTP/1.1',
-                requestId: 'c6af9ac6-7b61-11e6-9a41-93e8deadbeef',
-                requestTimeEpoch: 1428582896000,
-                resourceId: '123456',
-                resourcePath: '/hello',
-                stage: 'dev',
-            },
-            resource: '',
-            stageVariables: {},
-        };
-        const result: APIGatewayProxyResult = await lambdaHandler(event);
+// Mock the SQS client
+const sqsMock = mockClient(SQSClient);
 
-        expect(result.statusCode).toEqual(200);
-        expect(result.body).toEqual(
-            JSON.stringify({
-                message: 'hello world',
-            }),
-        );
+// Mock the SSM client
+// const ssmMock = mockClient(SSMClient);
+
+// Mock the RequeryService
+jest.mock('../../services', () => ({
+    RequeryService: jest.fn().mockImplementation(() => ({
+        processMessageAsync: jest.fn(),
+    })),
+}));
+
+// Set up environment variables as per the SAM template
+process.env.TransferRequeryQueueUrl = '/wallet/TransferRequeryQueueUrl';
+
+describe('Unit test for SQS handler', () => {
+    beforeEach(() => {
+        sqsMock.reset();
+        // ssmMock.reset();
     });
+
+    it('verifies successful message processing', async () => {
+        // Mock the SSM GetParameterCommand
+        ssmMock.on(GetParameterCommand, { Name: '/wallet/TransferRequeryQueueArn' }).resolves({
+            Parameter: {
+                Value: 'arn:aws:sqs:us-east-1:123456789012:TransferRequeryQueue',
+            },
+        });
+
+        const event: SQSEvent = {
+            Records: [
+                {
+                    messageId: '1',
+                    receiptHandle: '1',
+                    body: JSON.stringify({ key: 'value' }),
+                    attributes: {
+                        ApproximateReceiveCount: '1',
+                        SentTimestamp: '1623238587645',
+                        SenderId: '123456789012',
+                        ApproximateFirstReceiveTimestamp: '1623238587645',
+                    },
+                    messageAttributes: {},
+                    md5OfBody: '',
+                    eventSource: 'aws:sqs',
+                    eventSourceARN: 'arn:aws:sqs:us-east-1:123456789012:TransferRequeryQueue',
+                    awsRegion: 'us-east-1',
+                },
+            ],
+        };
+
+        const context: Context = {} as Context;
+        const requeryServiceInstance = new RequeryService();
+        const mockProcessMessageAsync = requeryServiceInstance.processMessageAsync as jest.Mock;
+        mockProcessMessageAsync.mockResolvedValueOnce(undefined);
+
+        await handler(event, context);
+
+        expect(mockProcessMessageAsync).toHaveBeenCalledTimes(1);
+        expect(mockProcessMessageAsync).toHaveBeenCalledWith(JSON.stringify({ key: 'value' }));
+
+        expect(ssmMock.calls()).toHaveLength(1);
+        expect(ssmMock).toHaveReceivedCommandWith(GetParameterCommand, {
+            Name: '/wallet/TransferRequeryQueueArn',
+        });
+    });
+
+
 });
