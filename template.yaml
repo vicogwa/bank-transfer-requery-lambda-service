@@ -47,7 +47,7 @@ Resources:
                 SQSEvent:
                     Type: SQS
                     Properties:
-                        !Ref TransferRequeryQueueArn
+                        Queue: !Ref TransferRequeryQueueArn
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
