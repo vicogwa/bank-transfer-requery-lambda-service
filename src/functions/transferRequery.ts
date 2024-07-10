@@ -2,7 +2,6 @@ import { SQSHandler, SQSEvent } from 'aws-lambda';
 import AWS from 'aws-sdk';
 import { RequeryService } from '../services';
 
-
 // Initialize the SQS service
 const sqs = new AWS.SQS();
 
