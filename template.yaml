@@ -13,7 +13,7 @@ Globals:
         Environment:
             Variables:
                 WalletHmacKey: !Ref WalletHmacKey
-                TransferRequeryEndpoint: !Ref TransferRequeryEndpoint
+                BASEURL: !Ref BASEURL
                 TransferRequeryQueueArn: !Ref TransferRequeryQueueArn
                 TransferRequeryQueueUrl: !Ref TransferRequeryQueueUrl
 
@@ -21,17 +21,15 @@ Parameters:
     WalletHmacKey:
         Type: AWS::SSM::Parameter::Value<String>
         Default: /wallet/hmacKey
-    TransferRequeryEndpoint:
+    BASEURL:
         Type: AWS::SSM::Parameter::Value<String>
-        Default: /wallet/TransferRequeryEndpoint
+        Default: /wallet/BaseUrl
     TransferRequeryQueueArn:
         Type: AWS::SSM::Parameter::Value<String>
         Default: /wallet/TransferRequeryQueueArn
     TransferRequeryQueueUrl:
         Type: AWS::SSM::Parameter::Value<String>
         Default: /wallet/TransferRequeryQueueUrl
-
-
 
 Resources:
     TransferRequeryFunction:
