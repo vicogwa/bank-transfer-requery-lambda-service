@@ -25,8 +25,10 @@ export class RequeryService {
             const queueBody: SnsEnvelope = (typeof sqsBody == 'string' ? JSON.parse(sqsBody) : sqsBody) as any;
             const Message: any =
                 typeof queueBody['Message'] == 'string' ? JSON.parse(queueBody.Message) : queueBody.Message;
+            // Process the message
             if (Message.sns_status[0] == 'Pending') {
                 const transactionRef: string = Message.charge.RelatedTransaction;
+                console.log('======RECORD========', queueBody);
 
                 // Requery the transaction using the extracted reference
                 const result = await postRequest(transactionRef);

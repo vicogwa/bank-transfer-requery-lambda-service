@@ -17,6 +17,7 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
     try {
         // Loop through each record in the SQS event
         for (const record of event.Records) {
+            console.log('======RECORD========', record);
             messageBody = record.body; // Extract the message body
             await transferRequeryService.processMessageAsync(messageBody); // Process the message
         }
