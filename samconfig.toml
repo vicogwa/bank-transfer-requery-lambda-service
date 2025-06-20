@@ -17,6 +17,11 @@ lint = true
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
 resolve_s3 = true
+s3_prefix = "bank-transfer-lambda-service"
+region = "us-east-2"
+parameter_overrides = "Environment=\"dev\" SecretName=\"my-lambda/SM-project\" QueueName=\"transfer-requery-queue\""
+image_repositories = []
+disable_rollback = true
 
 [default.package.parameters]
 resolve_s3 = true
