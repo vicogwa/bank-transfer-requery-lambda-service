@@ -24,13 +24,13 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
     } catch (error) {
         if (messageBody) {
             // Prepare parameters for sending the message to another SQS queue
-            const sqsParams: AWS.SQS.SendMessageRequest = {
-                QueueUrl: process.env.SQS_QUEUE_URL as string, // The URL of the queue to which the message should be sent
-                MessageBody: messageBody, // The message body to be retried
+            const sqsParams: AWS.SQS.Types.SendMessageRequest = {
+                QueueUrl: process.env.SQS_QUEUE_URL as string,
+                MessageBody: messageBody,
             };
 
             try {
-                await sqs.sendMessage(sqsParams).promise(); // Send the message to the SQS queue for reprocessing
+                 await sqs.sendMessage(sqsParams).promise(); // Send the message to the SQS queue for reprocessing
             } catch (sqsError) {
                 console.error('Error sending message to SQS:', sqsError);
                 // Handle or log the error appropriately
